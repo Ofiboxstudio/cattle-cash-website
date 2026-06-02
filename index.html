@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<!--
+==================================================================================
+  CATTLE CASH — Brand & Content Bible · Presentation Deck (v3 layout)
+  Single file. No build step. Open in a browser. Vanilla HTML/CSS/JS only.
+==================================================================================
+  LAYOUT ....... Full-screen SCROLL-SNAP SLIDES. Each <section class="slide"> is one
+                 100svh panel that snaps into place (scroll-snap-type: y mandatory).
+                 Navigate by scroll, the right-side dots, or ↑/↓ · PageUp/Dn · Space.
+  MOOD ......... BRIGHT & WARM, on-brand. Cream paper, sunny gold, coral, sky-blue,
+                 prairie green, brand-iron red — it looks like the cartoon it sells.
+                 Each slide carries a rotating --accent for rhythm.
+  TYPE ......... Display "Fraunces" (variable serif) + body "Inter" (Google Fonts).
+  IMAGERY ...... REAL ART in images/ : the logo (brand mark, top bar + closing), the gold
+                 coin (hero), the 12 characters (cast, Herd Regulars + the Handshake trio), and 6
+                 location plates (World gallery + pilot/trailer stills). World = warm solarpunk-Western blend.
+                 Pending art: the Exchange (L2) and the Handshake trio (Slim/Hank/Marigold) — referenced, no image yet.
+  MOTION ....... Slide content reveals when its slide becomes active (IntersectionObserver).
+                 Smooth snap + optional keyboard nav. ALL gated by prefers-reduced-motion.
+                 Progressive enhancement: html.no-js -> js on load; with no JS everything shows.
+  A11Y/PRINT ... Semantic sections w/ aria-labels, AA contrast on cream, keyboard nav,
+                 focus-visible. @media print drops snap -> a normal light document.
+  No emoji in the deck (brand rule). Content pulled from the v2.0 bible; no invented lore.
+==================================================================================
+-->
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="Cattle Cash — an upbeat short-form content brand around a community currency on Flipcash. Partner deck." />
+<title>Cattle Cash — Brand Deck</title>
+<script>document.documentElement.className = document.documentElement.className.replace('no-js','js');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+/* ===================== TOKENS ===================== */
+:root{
+  --cream:#FFF8E9; --cream-2:#FBEFCE; --paper:#FEFBF3;
+  --gold:#F4B731; --gold-deep:#E0991F; --coral:#F2825C; --sky:#5FB0E5;
+  --green:#7FB069; --red:#D2552F; --tan:#E8C9A0; --turq:#3FBFAD;
+  --ink:#39271C; --ink-soft:#6B5644; --ink-faint:#9A856E;
+  --serif:"Fraunces",Georgia,"Times New Roman",serif;
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --shadow:0 18px 50px rgba(57,39,28,.16); --shadow-sm:0 8px 24px rgba(57,39,28,.12);
+  --maxw:1180px; --ease:cubic-bezier(.22,.61,.36,1);
+  --accent:var(--gold); /* per-slide override */
+}
+*{box-sizing:border-box;}
+html{scroll-snap-type:y mandatory;scroll-behavior:smooth;-webkit-text-size-adjust:100%;height:100%;}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;scroll-snap-type:none;}}
+body{
+  margin:0;color:var(--ink);font-family:var(--sans);line-height:1.6;background:var(--cream);
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+}
+h1,h2,h3,h4{font-family:var(--serif);font-weight:600;line-height:1.04;letter-spacing:-.02em;margin:0;font-optical-sizing:auto;}
+p{margin:0;} a{color:var(--red);}
+::selection{background:var(--gold);color:var(--ink);}
+:focus-visible{outline:3px solid var(--sky);outline-offset:3px;border-radius:4px;}
+
+/* ===================== SLIDE SYSTEM ===================== */
+.slide{
+  min-height:100svh;scroll-snap-align:start;scroll-snap-stop:always;
+  display:grid;place-items:center;position:relative;overflow:hidden;
+  padding:clamp(3.5rem,7vh,6rem) clamp(1.25rem,5vw,5rem);
+}
+.slide-inner{max-width:var(--maxw);width:100%;margin:0 auto;position:relative;z-index:2;}
+/* soft sun glow accent per slide */
+.slide::before{content:"";position:absolute;z-index:0;width:60vw;height:60vw;max-width:760px;max-height:760px;
+  right:-12vw;top:-16vw;border-radius:50%;background:radial-gradient(circle,var(--accent),transparent 68%);
+  opacity:.20;pointer-events:none;}
+.slide:nth-child(even)::before{right:auto;left:-14vw;top:auto;bottom:-18vw;}
+
+.kicker{font-family:var(--sans);font-size:clamp(.7rem,.66rem+.2vw,.82rem);font-weight:700;letter-spacing:.28em;
+  text-transform:uppercase;color:var(--red);display:flex;align-items:center;gap:.7rem;margin-bottom:.85rem;}
+.kicker::before{content:"";width:30px;height:3px;border-radius:2px;background:var(--accent);}
+.display{font-size:clamp(2.4rem,1.2rem+5.4vw,6rem);font-weight:560;letter-spacing:-.03em;line-height:.98;}
+.display em{font-style:italic;color:var(--accent);}
+/* section title — consistent H2 across content slides (eyebrow → s-title → lede) */
+.s-title{font-family:var(--serif);font-weight:600;font-size:clamp(1.8rem,1rem+2.8vw,3.2rem);line-height:1.04;letter-spacing:-.025em;color:var(--ink);margin-bottom:1.1rem;}
+.s-title em{font-style:italic;color:var(--accent);}
+.s-title.center{margin-left:auto;margin-right:auto;text-align:center;}
+.lede{font-size:clamp(1.05rem,.98rem+.5vw,1.45rem);color:var(--ink-soft);font-weight:400;max-width:60ch;}
+
+/* reveal */
+.js .reveal{opacity:0;transform:translateY(26px);transition:opacity .8s var(--ease),transform .8s var(--ease);}
+.js .slide.active .reveal{opacity:1;transform:none;}
+.js .slide.active .reveal.d1{transition-delay:.1s;}
+.js .slide.active .reveal.d2{transition-delay:.2s;}
+.js .slide.active .reveal.d3{transition-delay:.3s;}
+.js .slide.active .reveal.d4{transition-delay:.4s;}
+@media (prefers-reduced-motion:reduce){.js .reveal{opacity:1!important;transform:none!important;}}
+
+/* ===================== CHROME (fixed) ===================== */
+.progress{position:fixed;top:0;left:0;height:4px;width:0;z-index:60;background:linear-gradient(90deg,var(--gold),var(--coral),var(--red));transition:width .15s linear;}
+.topbar{position:fixed;top:0;left:0;right:0;z-index:55;display:flex;align-items:center;justify-content:space-between;
+  padding:1rem clamp(1.25rem,5vw,3rem);pointer-events:none;}
+.brandmark{display:flex;align-items:center;gap:.55rem;font-family:var(--serif);font-weight:700;font-size:1.02rem;color:var(--ink);pointer-events:auto;}
+.brandmark .mark{width:30px;height:30px;color:var(--red);}
+.topbar .v{font-family:var(--sans);font-size:.7rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);pointer-events:auto;}
+/* left section-nav (fixed rail with visible titles) — shown on desktop only */
+.sidenav{position:fixed;left:clamp(1rem,1.8vw,1.9rem);top:50%;transform:translateY(-50%);z-index:55;display:none;flex-direction:column;gap:.5rem;}
+.sidenav a{display:flex;align-items:center;gap:.55rem;font-family:var(--sans);font-size:.66rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);text-decoration:none;white-space:nowrap;line-height:1;transition:color .25s var(--ease);}
+.sidenav a::before{content:"";width:14px;height:2px;border-radius:2px;background:currentColor;opacity:.45;transition:width .25s var(--ease),opacity .25s var(--ease);flex:none;}
+.sidenav a:hover{color:var(--ink);}
+.sidenav a:hover::before{opacity:1;}
+.sidenav a[aria-current="true"]{color:var(--red);}
+.sidenav a[aria-current="true"]::before{width:28px;opacity:1;}
+.mark svg{display:block;width:100%;height:100%;}
+
+/* ===================== STILL (21:9 placeholder) ===================== */
+figure.still{margin:0;border-radius:16px;overflow:hidden;box-shadow:var(--shadow);border:1px solid rgba(57,39,28,.08);background:var(--paper);}
+.still .frame{aspect-ratio:21/9;position:relative;display:flex;align-items:flex-end;padding:1rem 1.2rem;background-size:cover;background-position:center;}
+.still .frame::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(57,39,28,.28));}
+.still .tag{position:absolute;top:.8rem;left:1rem;z-index:2;font-family:var(--sans);font-size:.58rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink);background:rgba(255,248,233,.85);padding:.25rem .55rem;border-radius:20px;}
+.still figcaption{font-family:var(--sans);font-size:.74rem;color:var(--ink-soft);padding:.6rem .9rem .8rem;line-height:1.4;}
+.still figcaption b{color:var(--ink);} .still .prm{color:var(--ink-faint);font-style:italic;}
+/* gradient fills (the bright world) */
+.g-town{background:radial-gradient(120% 150% at 72% 12%,#FCE08A,#F4B731 34%,#F2825C 70%,#D2552F);}
+.g-bossy{background:radial-gradient(120% 130% at 50% 22%,#FCE08A,#F4B731 55%,#E0991F);}
+.g-penny{background:radial-gradient(120% 130% at 50% 26%,#FBE5C6,#E8C9A0 45%,#F2825C);}
+.g-sage{background:radial-gradient(120% 130% at 50% 22%,#C5E6B4,#7FB069 52%,#5FB0E5);}
+.g-sutter{background:radial-gradient(120% 130% at 50% 26%,#D7DBD6,#9AA29A 55%,#5B6B86);}
+.g-exchange{background:radial-gradient(120% 150% at 28% 16%,#9BD8EE,#5FB0E5 42%,#F2825C);}
+.g-post{background:radial-gradient(120% 140% at 60% 22%,#FCE08A,#F4B731 48%,#D2552F);}
+/* location gallery (slide 5) */
+.locgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(.7rem,1.5vw,1.1rem);margin-top:1.3rem;}
+.locgrid figcaption{padding:.5rem .7rem .65rem;font-size:.72rem;} .locgrid .still .frame{padding:.5rem .7rem;}
+.loc-note{font-size:.8rem;color:var(--ink-faint);margin-top:.95rem;font-style:italic;}
+/* Flipcash mark — the platform Cattle Cash runs on */
+.fc-badge{display:inline-block;border-radius:22%;overflow:hidden;background:#1a1a1a;box-shadow:var(--shadow-sm);vertical-align:middle;}
+.fc-badge img{width:100%;height:100%;display:block;object-fit:cover;}
+.fc-inline{width:20px;height:20px;margin-right:.4rem;}
+.still .frame.fc-frame{background:#171717;align-items:center;justify-content:center;}
+.still .frame.fc-frame img{width:clamp(46px,9vw,84px);height:auto;}
+.fc-powered{display:inline-flex;align-items:center;gap:.55rem;margin-top:1.6rem;font-family:var(--sans);font-size:.82rem;font-weight:600;letter-spacing:.03em;color:var(--ink-soft);}
+.fc-powered .fc-badge{width:30px;height:30px;} .fc-powered b{color:var(--ink);}
+
+/* ===================== HERO (slide 1) — coin (left) / video (right), minimal ===================== */
+.hero .slide-inner{display:grid;gap:clamp(1.6rem,4vh,2.6rem);}
+.hero-grid{display:grid;grid-template-columns:.92fr 1.12fr;gap:clamp(1.8rem,5vw,4.5rem);align-items:center;}
+.hero-copy{display:flex;flex-direction:column;align-items:center;text-align:center;gap:clamp(1.3rem,3vh,2.1rem);}
+.hero-title{font-family:var(--serif);font-weight:600;font-size:clamp(2.4rem,1rem+4.4vw,4.6rem);line-height:.96;letter-spacing:-.03em;color:var(--ink);}
+.hero-title em{font-style:italic;color:var(--accent);}
+.hero-actions{margin-top:.2rem;}
+.hero-actions .cta{margin-top:0;}
+/* coin — hero brand object: warm glow + gentle float */
+.coin-stage{position:relative;display:grid;place-items:center;padding:clamp(.6rem,2vw,1.4rem);}
+.coin-stage::before{content:"";position:absolute;width:122%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,var(--gold),transparent 60%);opacity:.28;filter:blur(6px);z-index:0;}
+.hero-coin{position:relative;z-index:1;width:clamp(150px,19vw,248px);height:auto;filter:drop-shadow(0 20px 32px rgba(57,39,28,.34));animation:coinFloat 6s var(--ease) infinite;}
+@keyframes coinFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@media (prefers-reduced-motion:reduce){ .hero-coin{animation:none;} }
+/* video anchor (right) */
+.hero-media{position:relative;}
+.video-frame{position:relative;width:100%;aspect-ratio:21/9;border-radius:18px;overflow:hidden;background:#171717;box-shadow:var(--shadow);border:1px solid rgba(57,39,28,.10);} /* 21:9 = brand cinematic; switch to 16/9 if your mp4 is 16:9 */
+.video-frame video,.video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;object-fit:contain;background:#171717;}
+/* episode meter — the 12-episode season tracker beneath the trailer */
+.ep-meter{margin-top:1.1rem;display:flex;flex-direction:column;align-items:center;gap:.6rem;}
+.ep-ticks{display:flex;gap:5px;}
+.ep-ticks span{width:14px;height:4px;border-radius:2px;background:rgba(57,39,28,.16);}
+.ep-ticks span:first-child{background:var(--accent);animation:epPulse 2.2s var(--ease) infinite;}
+@keyframes epPulse{0%,100%{opacity:1}50%{opacity:.3}}
+@media (prefers-reduced-motion:reduce){ .ep-ticks span:first-child{animation:none;} }
+.ep-label{font-family:var(--sans);font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);}
+.ep-label b{color:var(--ink);}
+.ep-label .soon{color:var(--coral);}
+.scrollcue{font-family:var(--sans);font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-faint);display:flex;align-items:center;gap:.6rem;}
+.scrollcue::after{content:"";width:1px;height:28px;background:linear-gradient(var(--red),transparent);}
+.chips{display:flex;gap:.5rem;flex-wrap:wrap;}
+.chip{font-family:var(--sans);font-size:.74rem;font-weight:700;color:var(--ink-soft);background:var(--paper);border:1.5px solid var(--cream-2);padding:.3rem .8rem;border-radius:30px;box-shadow:var(--shadow-sm);}
+
+/* ===================== REAL ART (logo medallion · coin · cast images) ===================== */
+.logo-badge{display:inline-grid;place-items:center;border-radius:50%;overflow:hidden;background:#14110E;box-shadow:var(--shadow-sm);}
+.logo-badge img{width:100%;height:100%;object-fit:cover;display:block;}
+.brandmark .logo-badge{width:34px;height:34px;}
+.closing .logo-badge{display:block;width:88px;height:88px;margin:0 auto 1.6rem;}
+.castimg{width:100%;aspect-ratio:3/4;object-fit:contain;background:#F6E6A6;border-radius:12px;margin-bottom:.8rem;display:block;}
+.regulars{display:grid;grid-template-columns:repeat(5,1fr);gap:.7rem;margin-top:1.4rem;}
+.reg-lab{font-family:var(--sans);font-size:.66rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);margin:1.6rem 0 .2rem;}
+.reg{text-align:center;}
+.reg img{width:100%;aspect-ratio:3/4;object-fit:contain;background:#F6E6A6;border-radius:10px;box-shadow:var(--shadow-sm);display:block;}
+.reg span{display:block;font-family:var(--sans);font-size:.66rem;font-weight:700;color:var(--ink-soft);margin-top:.35rem;}
+
+/* ===================== shared bits ===================== */
+.bigquote{font-family:var(--serif);font-size:clamp(1.8rem,1rem+3.4vw,4rem);font-weight:560;line-height:1.08;letter-spacing:-.02em;max-width:20ch;}
+.bigquote b{font-style:italic;color:var(--accent);font-weight:600;}
+.byline{font-family:var(--sans);font-size:.85rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--red);margin-top:1.6rem;}
+.themeword{font-family:var(--serif);font-weight:300;font-size:clamp(5rem,2rem+18vw,18rem);line-height:.78;letter-spacing:-.04em;color:var(--accent);}
+.grid{display:grid;gap:clamp(.9rem,2vw,1.4rem);}
+.g2{grid-template-columns:1fr 1fr;} .g3{grid-template-columns:repeat(3,1fr);} .g4{grid-template-columns:repeat(4,1fr);}
+.trinity{align-items:stretch;}
+.pillar{display:flex;flex-direction:column;align-items:center;text-align:center;gap:.7rem;padding:clamp(1.5rem,3vw,2.3rem) clamp(1.1rem,2vw,1.5rem);border-top:3px solid var(--accent);transition:transform .35s var(--ease),box-shadow .35s var(--ease);}
+.pillar:hover{transform:translateY(-5px);box-shadow:var(--shadow);}
+.pillar .p-lab{font-family:var(--sans);font-size:.66rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);}
+.pillar .p-focal{font-family:var(--serif);font-size:clamp(1.2rem,1rem+1vw,1.65rem);font-weight:560;line-height:1.2;color:var(--ink);}
+.pillar .p-focal b{font-style:italic;color:var(--accent);font-weight:600;}
+.pillar .p-word{font-family:var(--serif);font-weight:300;font-size:clamp(2.8rem,1.5rem+4.5vw,5rem);line-height:.85;letter-spacing:-.02em;color:var(--accent);}
+.pillar .p-sub{font-family:var(--sans);font-size:.9rem;color:var(--ink-soft);max-width:26ch;margin-top:auto;padding-top:.4rem;}
+@media (prefers-reduced-motion:reduce){ .pillar{transition:none;} .pillar:hover{transform:none;} }
+.card{background:var(--paper);border:1px solid var(--cream-2);border-radius:18px;padding:1.1rem 1.2rem;box-shadow:var(--shadow-sm);}
+.card .av{aspect-ratio:21/9;border-radius:12px;margin-bottom:.8rem;}
+.card .role{font-family:var(--sans);font-size:.66rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--red);}
+.card h3{font-size:1.2rem;margin:.15rem 0 .35rem;}
+.card p{font-size:.85rem;color:var(--ink-soft);}
+.card .vo{font-family:var(--serif);font-style:italic;font-size:.92rem;color:var(--ink);margin-top:.5rem;}
+.split{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(1.4rem,4vw,3.5rem);align-items:center;}
+.pts{display:flex;flex-direction:column;gap:.9rem;margin-top:1.2rem;}
+.pt{padding-left:1rem;border-left:3px solid var(--accent);}
+.pt b{font-family:var(--serif);font-size:1.1rem;}
+.pt span{display:block;font-size:.85rem;color:var(--ink-soft);}
+table{width:100%;border-collapse:collapse;font-size:clamp(.78rem,.7rem+.3vw,.95rem);background:var(--paper);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm);}
+th,td{text-align:left;padding:.6rem .85rem;border-bottom:1px solid var(--cream-2);}
+th{background:var(--ink);color:var(--cream);font-family:var(--serif);font-weight:600;}
+tr:last-child td{border-bottom:none;}
+td .w{font-family:var(--serif);font-weight:600;color:var(--ink);} td .say{display:block;color:var(--red);font-size:.92em;}
+.honest{margin-top:1.4rem;font-family:var(--serif);font-style:italic;font-size:clamp(1.1rem,.9rem+1vw,1.6rem);color:var(--ink);}
+.honest b{color:var(--red);font-style:normal;}
+.film{display:grid;grid-template-columns:repeat(6,1fr);gap:.6rem;margin-top:1.6rem;}
+.beat{background:var(--paper);border:1px solid var(--cream-2);border-radius:14px;padding:.9rem .8rem;box-shadow:var(--shadow-sm);}
+.beat .n{font-family:var(--serif);font-weight:700;color:var(--accent);font-size:1.3rem;}
+.beat b{display:block;font-family:var(--serif);font-size:.98rem;margin:.2rem 0 .15rem;}
+.beat .t{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);}
+.beat p{font-size:.74rem;color:var(--ink-soft);margin-top:.35rem;}
+.runtime{font-family:var(--serif);font-size:clamp(1.6rem,1rem+2.6vw,3.2rem);font-weight:500;}
+.runtime em{font-style:italic;color:var(--accent);}
+.credits{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1.2rem,3vw,2.6rem);margin-top:1.4rem;}
+.cred .l{font-family:var(--sans);font-size:.68rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--red);margin-bottom:.7rem;}
+.cred dt{font-family:var(--serif);font-size:1.02rem;font-weight:600;margin-top:.7rem;}
+.cred dd{margin:.15rem 0 0;font-size:.82rem;color:var(--ink-soft);}
+.jobs{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;margin-top:1.4rem;}
+.job{background:var(--paper);border:1px solid var(--cream-2);border-radius:18px;padding:clamp(1.3rem,3vw,2.2rem);box-shadow:var(--shadow-sm);}
+.job .num{font-family:var(--serif);font-weight:300;font-size:clamp(2.4rem,1.5rem+3vw,4.5rem);color:var(--accent);line-height:1;}
+.job h3{font-size:1.4rem;margin:.4rem 0 .5rem;} .job p{color:var(--ink-soft);font-size:.9rem;}
+.closing{text-align:center;}
+.closing .display{font-size:clamp(2.8rem,1.4rem+7vw,8rem);}
+.closing .mark{width:54px;height:54px;color:var(--red);margin:0 auto 1.8rem;}
+.contact{margin-top:2rem;display:inline-flex;flex-direction:column;gap:.5rem;}
+.contact a{font-family:var(--serif);font-size:1.3rem;color:var(--ink);text-decoration:none;border-bottom:2px solid var(--gold);padding-bottom:.2rem;}
+.contact .note{font-size:.72rem;color:var(--ink-faint);}
+.disc{margin-top:2.5rem;font-size:.72rem;color:var(--ink-faint);max-width:54ch;margin-left:auto;margin-right:auto;}
+/* closing logo lockup + download CTA */
+.lockup{display:flex;align-items:center;justify-content:center;gap:clamp(.9rem,3vw,2rem);margin-bottom:clamp(1.4rem,3.5vh,2.2rem);}
+.closing .lockup .logo-badge,.closing .lockup .fc-badge{width:clamp(74px,11vw,108px);height:clamp(74px,11vw,108px);margin:0;}
+.lockup-on{font-family:var(--serif);font-style:italic;font-size:clamp(1.1rem,1rem+.7vw,1.6rem);color:var(--ink-faint);}
+.cta{display:inline-flex;align-items:center;gap:.5rem;margin-top:1.7rem;font-family:var(--sans);font-weight:700;font-size:clamp(.98rem,.9rem+.4vw,1.18rem);color:var(--ink);background:var(--gold);padding:.9rem 1.7rem;border-radius:40px;text-decoration:none;box-shadow:var(--shadow-sm);transition:transform .3s var(--ease),box-shadow .3s var(--ease),background .3s var(--ease);}
+.cta:hover{transform:translateY(-3px);background:var(--gold-deep);box-shadow:var(--shadow);color:var(--ink);}
+.cta-url{margin-top:.9rem;font-family:var(--sans);font-size:.85rem;letter-spacing:.04em;}
+.cta-url a{color:var(--ink-soft);text-decoration:none;border-bottom:1.5px solid var(--gold);padding-bottom:.1rem;}
+.cta-url a:hover{color:var(--red);}
+@media (prefers-reduced-motion:reduce){ .cta{transition:none;} .cta:hover{transform:none;} }
+
+/* ===================== RESPONSIVE ===================== */
+/* desktop: show the left section-nav + reserve a rail so labels never overlap content */
+@media (min-width:1024px){ .sidenav{display:flex;} .slide{padding-left:clamp(10rem,13vw,15rem);} }
+/* tablet */
+@media (max-width:900px){ .hero-grid{grid-template-columns:1fr;} .g4{grid-template-columns:repeat(2,1fr);} .g3{grid-template-columns:1fr;} .g2{grid-template-columns:1fr;} .jobs{grid-template-columns:1fr;} .locgrid{grid-template-columns:repeat(2,1fr);} }
+/* phone */
+@media (max-width:560px){ .g4{grid-template-columns:1fr;} .castimg{aspect-ratio:1/1;} .regulars{grid-template-columns:repeat(3,1fr);} .locgrid{grid-template-columns:1fr;} table{font-size:.8rem;} }
+
+/* ===================== PRINT ===================== */
+@media print{
+  html{scroll-snap-type:none;} .progress,.sidenav,.scrollcue,.topbar .v{display:none!important;}
+  .slide{min-height:auto;page-break-after:always;padding:1.4rem;} .slide::before{display:none;}
+  .js .reveal{opacity:1!important;transform:none!important;}
+  body{background:#fff;}
+}
+</style>
+</head>
+<body>
+<div class="progress" id="progress" aria-hidden="true"></div>
+<div class="topbar">
+  <span class="brandmark"><span class="logo-badge"><img src="images/cattle-cash-logo.jpeg" alt="Cattle Cash logo" /></span> Cattle Cash</span>
+  <!-- <span class="v">Brand Deck · v2.0</span> -->
+</div>
+
+<nav class="sidenav" aria-label="Sections">
+  <a href="#s1" aria-current="true"><span>Opening</span></a>
+  <a href="#s2"><span>The Pitch</span></a>
+  <a href="#s4"><span>Cast</span></a>
+  <a href="#s5"><span>World</span></a>
+  <a href="#s6"><span>In the World</span></a>
+  <a href="#s8"><span>Pilot &amp; Trailer</span></a>
+  <a href="#s10"><span>What It Earns</span></a>
+  <a href="#s11"><span>Join the Herd</span></a>
+</nav>
+
+<main>
+
+  <!-- 1 HERO — coin (left) + trailer (right), minimal -->
+  <section class="slide hero" id="s1" style="--accent:var(--gold);" aria-label="Opening">
+    <div class="slide-inner">
+      <div class="hero-grid">
+        <!-- LEFT: minimal message + the coin -->
+        <div class="hero-copy">
+          <h1 class="hero-title reveal d1">Grab your brand.<br><em>Join the herd.</em></h1>
+          <div class="coin-stage reveal d2">
+            <img class="hero-coin" src="images/cattle-cash-coin-small.jpeg" alt="The Cattle Cash gold coin — interlocked CC monogram, two stars, a sunburst" />
+          </div>
+          <div class="hero-actions reveal d3">
+            <a class="cta" href="https://flipcash.com" target="_blank" rel="noopener">Join the herd on Flipcash</a>
+          </div>
+        </div>
+        <!-- RIGHT: the trailer -->
+        <div class="hero-media reveal d2">
+          <div class="video-frame">
+            <video class="video-el" controls playsinline preload="metadata"
+                   poster="images/cattle-cash-poster.png">
+              <source src="video/trailer.mp4" type="video/mp4" />
+              Your browser can't play embedded video — <a href="video/trailer.mp4">download the trailer</a>.
+            </video>
+          </div>
+          <div class="ep-meter" aria-label="Episode 0 of 12 — coming soon">
+            <div class="ep-ticks" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <p class="ep-label"><b>Episode 0 of 12</b> · <span class="soon">Coming soon</span></p>
+          </div>
+        </div>
+      </div>
+      <p class="scrollcue reveal d4">Scroll</p>
+    </div>
+  </section>
+
+  <!-- 2 BRAND TRUTH + NORTH STAR + THEME (three columns) -->
+  <section class="slide" id="s2" style="--accent:var(--coral);" aria-label="The Brand Truth, North Star, and the theme word">
+    <div class="slide-inner">
+      <p class="kicker reveal" style="justify-content:center;">The Pitch</p>
+      <h2 class="s-title center reveal d1" style="margin-bottom:clamp(1.6rem,4vh,2.6rem);">What Cattle Cash is.</h2>
+      <div class="grid g3 trinity">
+        <article class="card pillar reveal d1" style="--accent:var(--coral);">
+          <p class="p-lab">The Brand Truth</p>
+          <p class="p-focal">A currency you <b>belong to</b> — not just hold.</p>
+          <p class="p-sub">We sell belonging, never price.</p>
+        </article>
+        <article class="card pillar reveal d2" style="--accent:var(--sky);">
+          <p class="p-lab">North Star</p>
+          <p class="p-focal">"Grab your brand and <b>join the herd</b>."</p>
+          <p class="p-sub">Every film leaves one feeling: <em>I want in.</em></p>
+        </article>
+        <article class="card pillar reveal d3" style="--accent:var(--gold-deep);">
+          <p class="p-lab">The One Word</p>
+          <div class="p-word">Brand</div>
+          <p class="p-sub">Your mark. Your crew. Your identity.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 CAST -->
+  <section class="slide" id="s4" style="--accent:var(--green);" aria-label="The Cast">
+    <div class="slide-inner">
+      <p class="kicker reveal">The Cast</p>
+      <h2 class="s-title reveal d1">Four principals. <em>One herd.</em></h2>
+      <!-- <p class="lede reveal d2" style="margin-bottom:1.4rem;">Bossy drives, Penny disrupts, Sage reacts (that's you), Sutter resists. Belonging always wins, warmly.</p> -->
+      <div class="grid g4">
+        <article class="card reveal d1"><img class="castimg" loading="lazy" src="images/characters/Bossy.png" alt="Bossy, the trail boss" /><div class="role">Host</div><h3>Bossy</h3><p>The big-hearted trail boss who brands you in.</p><p class="vo">"You got a brand yet, kid?"</p></article>
+        <article class="card reveal d2"><img class="castimg" loading="lazy" src="images/characters/Penny.png" alt="Penny, the mascot calf" /><div class="role">Mascot</div><h3>Penny</h3><p>The chaos calf. No words — all heart and kazoo. The meme.</p><p class="vo">(a moo, a bell, huge eyes)</p></article>
+        <article class="card reveal d3"><img class="castimg" loading="lazy" src="images/characters/Sage.png" alt="Sage, the newcomer" /><div class="role">Avatar — the you</div><h3>Sage</h3><p>The newcomer who rides in and joins the Herd.</p><p class="vo">"…This is for me?"</p></article>
+        <article class="card reveal d4"><img class="castimg" loading="lazy" src="images/characters/Mr-Sutter.png" alt="Mr. Sutter, the comedy-foil banker" /><div class="role">Comedy foil</div><h3>Mr. Sutter</h3><p>The stuffy banker who never gets the fun. Flops, never menaces.</p><p class="vo">"Per our policy…"</p></article>
+      </div>
+      <p class="reg-lab reveal d4">+ the Herd Regulars</p>
+      <div class="regulars reveal d4">
+        <div class="reg"><img loading="lazy" src="images/characters/Chuckwagon%20Cook.png" alt="the Chuckwagon Cook" /><span>Cook</span></div>
+        <div class="reg"><img loading="lazy" src="images/characters/Fiddle%20Kid.png" alt="the Fiddle Kid" /><span>Fiddle Kid</span></div>
+        <div class="reg"><img loading="lazy" src="images/characters/Calm%20Old%20Wrangler.png" alt="the Calm Old Wrangler" /><span>Wrangler</span></div>
+        <div class="reg"><img loading="lazy" src="images/characters/Sutter%27s%20Clerks.png" alt="Sutter's four identical clerks" /><span>Clerks</span></div>
+        <div class="reg"><img loading="lazy" src="images/characters/Sutter%27s%20Embarrassed%20Horse.png" alt="Sutter's embarrassed horse" /><span>The Horse</span></div>
+      </div>
+      <p class="reg-lab reveal d4">+ The Handshake &mdash; &ldquo;take care of it&rdquo;</p>
+      <div class="regulars reveal d4" style="grid-template-columns:repeat(3,1fr);max-width:560px;">
+        <div class="reg"><img loading="lazy" src="images/characters/Slim.png" alt="Slim, the warm elder of the Handshake" /><span>Slim</span></div>
+        <div class="reg"><img loading="lazy" src="images/characters/Hank.png" alt="Hank, the steady hand" /><span>Hank</span></div>
+        <div class="reg"><img loading="lazy" src="images/characters/Marigold.png" alt="Marigold, the cared-for cow" /><span>Marigold</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 WORLD -->
+  <section class="slide" id="s5" style="--accent:var(--gold);" aria-label="The World">
+    <div class="slide-inner">
+      <p class="kicker reveal">The World</p>
+      <h2 class="s-title reveal d1">Drovers' Cross — a warm <em>solarpunk-Western</em> boomtown.</h2>
+      <p class="lede reveal d2" style="max-width:66ch;">Old-West craft meets a hand-built, sunlit future — airships on the horizon, copper solar sails on the rooftops, ridge windmills — and the whole gang's welcome. The cast stays pure Western; the blend lives in the world.</p>
+      <div class="locgrid reveal d2">
+        <figure class="still"><div class="frame" style="background-image:url('images/locations/Drovers%27%20Cross%20Establishing%20Wide.png')"></div><figcaption><b>Drovers' Cross</b> — the crossroads</figcaption></figure>
+        <figure class="still"><div class="frame" style="background-image:url('images/locations/The%20Market%20Street.png')"></div><figcaption><b>Market Street</b> — the bustle</figcaption></figure>
+        <figure class="still"><div class="frame" style="background-image:url('images/locations/The%20Branding%20Post.png')"></div><figcaption><b>The Branding Post</b> — "you belong now"</figcaption></figure>
+        <figure class="still"><div class="frame" style="background-image:url('images/locations/Bossy%27s%20Porch%20%2B%20the%20Chuckwagon.png')"></div><figcaption><b>Bossy's Porch</b> — the heart</figcaption></figure>
+        <figure class="still"><div class="frame" style="background-image:url('images/locations/First%20Stockyard%20Trust%20Interior.png')"></div><figcaption><b>First Stockyard Trust</b> — the foil's drab lair</figcaption></figure>
+        <figure class="still"><div class="frame" style="background-image:url('images/locations/The%20Open%20Range%20at%20Golden%20Hour.png')"></div><figcaption><b>The Open Range</b> — golden hour</figcaption></figure>
+        <!-- <figure class="still"><div class="frame fc-frame"><img src="images/flipcash.jpeg" alt="Flipcash logo" /></div><figcaption><b>The Exchange</b> — Flipcash, in-world</figcaption></figure> -->
+      </div>
+      <p class="loc-note reveal d3">The Herd is the outfit you join; the Exchange <em>is</em> Flipcash itself — where you join the herd. (Its in-world art is coming.)</p>
+    </div>
+  </section>
+
+  <!-- 6 DIEGETIC -->
+  <section class="slide" id="s6" style="--accent:var(--coral);" aria-label="How Cattle Cash lives in the world">
+    <div class="slide-inner">
+      <p class="kicker reveal">In the World</p>
+      <h2 class="s-title reveal d1">We live it. <em>Never explain it.</em></h2>
+      <p class="lede reveal d2" style="margin-bottom:1.2rem;">Characters never explain the product — they <em>live</em> it. The finance stays invisible; the fun stays on screen.</p>
+      <table class="reveal d2">
+        <tr><th>Real mechanic (never said)</th><th>In the world — what they say</th></tr>
+        <tr><td>Joining the community on Flipcash</td><td><span class="w">Getting branded into the Herd</span><span class="say">"Get your brand, kid."</span></td></tr>
+        <tr><td><span class="fc-badge fc-inline"><img src="images/flipcash.jpeg" alt="Flipcash" /></span>Flipcash, the platform</td><td><span class="w">The Exchange</span><span class="say">"Meet me at the Exchange."</span></td></tr>
+        <tr><td>Sending value, instantly</td><td><span class="w">A flip</span><span class="say">"Just flip it!"</span></td></tr>
+        <tr><td>It's yours — self-custody</td><td><span class="w">Your poke</span><span class="say">"It's in your poke."</span></td></tr>
+      </table>
+      <p class="honest reveal d3">There's no in-world word for "stable" or "settled" — because we never say them. <b>We talk about the herd, not the price.</b></p>
+    </div>
+  </section>
+
+  <!-- 8 PILOT + TRAILER -->
+  <section class="slide" id="s8" style="--accent:var(--green);" aria-label="The Pilot and Trailer">
+    <div class="slide-inner">
+      <p class="kicker reveal">On Screen</p>
+      <h2 class="s-title reveal d1">The pilot &amp; the trailer.</h2>
+      <div class="grid g2">
+        <div class="reveal d1">
+          <h3 style="font-size:clamp(1.6rem,1rem+2vw,2.6rem);">"Join the Herd"</h3>
+          <p class="lede" style="font-size:1rem;margin-top:.6rem;">A nervous newcomer with no brand gets adopted by a chaos calf and welcomed into the Herd — while the town banker fails, hilariously, to stop it.</p>
+          <figure class="still" style="margin-top:1rem;"><div class="frame" style="background-image:url('images/locations/The%20Branding%20Post.png')"></div><figcaption><b>The Branding Post welcome.</b> </figcaption></figure>
+        </div>
+        <div class="reveal d2">
+          <h3 style="font-size:clamp(1.6rem,1rem+2vw,2.6rem);">"Meet the Herd"</h3>
+          <p class="lede" style="font-size:1rem;margin-top:.6rem;">A ~40-second sun-drenched fly-through of the whole gang, building to one warm invitation. Anthemic, joyful, zero words about price.</p>
+          <figure class="still" style="margin-top:1rem;"><div class="frame" style="background-image:url('images/locations/Drovers%27%20Cross%20Establishing%20Wide.png')"></div><figcaption><b>Aerial reveal of the boomtown.</b> </figcaption></figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 WHAT IT EARNS -->
+  <section class="slide" id="s10" style="--accent:var(--coral);" aria-label="What This Earns">
+    <div class="slide-inner">
+      <p class="kicker reveal">What It Earns</p>
+      <h2 class="s-title reveal d1">Two jobs at once.</h2>
+      <p class="lede reveal d2">Every piece does two jobs. Only entertain and it's a cartoon; only sell and it's an ad. It must do both.</p>
+      <div class="jobs">
+        <div class="job reveal d1"><div class="num">01</div><h3>Entertain</h3><p>Fun to watch with the sound on, start to finish. Charm earns the watch.</p></div>
+        <div class="job reveal d2"><div class="num">02</div><h3>Earn one action</h3><p>Drive one step toward Cattle Cash on Flipcash — an invitation to belong, landed on the Brand Stamp. Never a price pitch.</p></div>
+      </div>
+      <p class="honest reveal d3" style="text-align:center;">The whole strategy in a line: <b>sell belonging, not price.</b></p>
+    </div>
+  </section>
+
+  <!-- 11 CLOSING — join the herd on Flipcash -->
+  <section class="slide closing" id="s11" style="--accent:var(--gold);" aria-label="Join the herd on Flipcash">
+    <div class="slide-inner">
+      <div class="lockup reveal">
+        <span class="logo-badge"><img src="images/cattle-cash-logo.jpeg" alt="Cattle Cash logo" /></span>
+        <span class="lockup-on" aria-hidden="true">on</span>
+        <span class="fc-badge"><img src="images/flipcash.jpeg" alt="Flipcash logo" /></span>
+      </div>
+      <h2 class="display reveal d1">Grab your brand.<br><em>Join the herd.</em></h2>
+      <p class="lede reveal d2" style="margin:1.2rem auto 0;max-width:44ch;">Cattle Cash lives on <b>Flipcash.</b> Download the app, grab your brand, and ride with the herd.</p>
+      <a class="cta reveal d2" href="https://flipcash.com" target="_blank" rel="noopener">Download Flipcash</a>
+      <!-- <p class="cta-url reveal d3"><a href="https://flipcash.com" target="_blank" rel="noopener">flipcash.com</a></p> -->
+      <p class="disc reveal d3">A community currency on Flipcash, on Solana. For fun and belonging — not financial advice. The price moves; we never claim otherwise. We talk about the herd, not the price.</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function(){
+  var rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var dots = Array.prototype.slice.call(document.querySelectorAll('.sidenav a'));
+  var bar = document.getElementById('progress');
+  var current = 0;
+
+  /* active slide + reveal + dots + progress (IntersectionObserver) */
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          e.target.classList.add('active');
+          current = slides.indexOf(e.target);
+          dots.forEach(function(d,i){ d.setAttribute('aria-current', i===current ? 'true':'false'); });
+          bar.style.width = ((current)/(slides.length-1))*100 + '%';
+        }
+      });
+    },{rootMargin:"-45% 0px -45% 0px",threshold:0});
+    slides.forEach(function(s){ io.observe(s); });
+  } else {
+    slides.forEach(function(s){ s.classList.add('active'); });
+  }
+
+  /* keyboard navigation (enhancement) */
+  function go(i){
+    i = Math.max(0, Math.min(slides.length-1, i));
+    slides[i].scrollIntoView({behavior: rm ? 'auto':'smooth', block:'start'});
+  }
+  document.addEventListener('keydown', function(ev){
+    var tag = (ev.target.tagName||'').toLowerCase();
+    if(tag==='input'||tag==='textarea') return;
+    if(['ArrowDown','PageDown'].indexOf(ev.key)>-1 || (ev.key===' ' && !ev.shiftKey)){ ev.preventDefault(); go(current+1); }
+    else if(['ArrowUp','PageUp'].indexOf(ev.key)>-1 || (ev.key===' ' && ev.shiftKey)){ ev.preventDefault(); go(current-1); }
+    else if(ev.key==='Home'){ ev.preventDefault(); go(0); }
+    else if(ev.key==='End'){ ev.preventDefault(); go(slides.length-1); }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+Put the trailer video in this folder, named exactly:
+
+    trailer.mp4
+
+So the final path is:  video/trailer.mp4
+
+It displays in the hero (left = coin, right = video).
+
+21:9 is recommended (the brand's cinematic ratio — the hero frame is set to 21:9).
+If your file is 16:9, change  aspect-ratio:21/9  to  16/9  in the .video-frame
+CSS rule inside ../index.html.
+
+You can delete this file once trailer.mp4 is added.
