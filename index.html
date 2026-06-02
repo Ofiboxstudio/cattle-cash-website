@@ -248,6 +248,22 @@ td .w{font-family:var(--serif);font-weight:600;color:var(--ink);} td .say{displa
 .cta-url a{color:var(--ink-soft);text-decoration:none;border-bottom:1.5px solid var(--gold);padding-bottom:.1rem;}
 .cta-url a:hover{color:var(--red);}
 @media (prefers-reduced-motion:reduce){ .cta{transition:none;} .cta:hover{transform:none;} }
+/* the sound — spinning-coin audio player */
+.sound-player{display:flex;flex-direction:column;align-items:center;gap:1.1rem;margin-top:.4rem;}
+.coin-btn{position:relative;width:clamp(150px,20vw,220px);height:clamp(150px,20vw,220px);padding:0;border:0;background:none;border-radius:50%;cursor:pointer;display:grid;place-items:center;filter:drop-shadow(0 16px 30px rgba(57,39,28,.30));transition:transform .3s var(--ease);}
+.coin-btn:hover{transform:scale(1.04);}
+.coin-disc{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;}
+.sound-player.playing .coin-disc{animation:coinSpin 7s linear infinite;}
+@keyframes coinSpin{to{transform:rotate(360deg);}}
+.coin-ic{position:absolute;width:clamp(50px,7vw,70px);height:clamp(50px,7vw,70px);border-radius:50%;background:rgba(57,39,28,.55);display:grid;place-items:center;color:#fff;transition:background .25s var(--ease);}
+.coin-btn:hover .coin-ic{background:rgba(57,39,28,.72);}
+.coin-ic svg{width:44%;height:44%;display:block;fill:currentColor;}
+.coin-ic .ic-pause{display:none;}
+.sound-player.playing .coin-ic .ic-play{display:none;}
+.sound-player.playing .coin-ic .ic-pause{display:block;}
+.sound-meta{font-family:var(--sans);font-size:.78rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);}
+.sound-meta b{color:var(--ink);}
+@media (prefers-reduced-motion:reduce){ .sound-player.playing .coin-disc{animation:none;} .coin-btn{transition:none;} }
 
 /* ===================== RESPONSIVE ===================== */
 /* desktop: show the left section-nav + reserve a rail so labels never overlap content */
@@ -280,6 +296,7 @@ td .w{font-family:var(--serif);font-weight:600;color:var(--ink);} td .say{displa
   <a href="#s5"><span>World</span></a>
   <a href="#s6"><span>In the World</span></a>
   <a href="#s8"><span>Pilot &amp; Trailer</span></a>
+  <a href="#s9"><span>The Sound</span></a>
   <a href="#s10"><span>What It Earns</span></a>
   <a href="#s11"><span>Join the Herd</span></a>
 </nav>
@@ -429,6 +446,26 @@ td .w{font-family:var(--serif);font-weight:600;color:var(--ink);} td .say{displa
     </div>
   </section>
 
+  <!-- 9 THE SOUND — playable 15s taste -->
+  <section class="slide" id="s9" style="--accent:var(--sky);" aria-label="The Sound">
+    <div class="slide-inner" style="text-align:center;display:flex;flex-direction:column;align-items:center;">
+      <p class="kicker reveal" style="justify-content:center;">The Sound</p>
+      <h2 class="s-title center reveal d1">Hear the herd.</h2>
+      <p class="lede reveal d2" style="margin:0 auto;">Upbeat Western swing — banjo, fiddle, stomp-claps, and the Brand Stamp ka-chunk. Tap the coin for a 15-second taste.</p>
+      <div class="sound-player reveal d3">
+        <button class="coin-btn" id="herd-play" type="button" aria-pressed="false" aria-label="Play a 15-second sound sample">
+          <img class="coin-disc" src="images/cattle-cash-coin-small.jpeg" alt="" />
+          <span class="coin-ic" aria-hidden="true">
+            <svg class="ic-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            <svg class="ic-pause" viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+          </span>
+        </button>
+        <p class="sound-meta"><b>A 15-second taste</b> · <span>0:15</span></p>
+      </div>
+      <audio id="herd-audio" preload="none" src="audio/cattle-cash-sound-beat.MP3"></audio>
+    </div>
+  </section>
+
   <!-- 10 WHAT IT EARNS -->
   <section class="slide" id="s10" style="--accent:var(--coral);" aria-label="What This Earns">
     <div class="slide-inner">
@@ -499,6 +536,22 @@ td .w{font-family:var(--serif);font-weight:600;color:var(--ink);} td .say{displa
     else if(ev.key==='Home'){ ev.preventDefault(); go(0); }
     else if(ev.key==='End'){ ev.preventDefault(); go(slides.length-1); }
   });
+
+  /* the sound — spinning-coin 15s audio sample */
+  var herdAudio = document.getElementById('herd-audio');
+  var herdPlay = document.getElementById('herd-play');
+  var herdWrap = herdPlay && herdPlay.closest('.sound-player');
+  if(herdAudio && herdPlay){
+    var herdState = function(on){
+      if(herdWrap) herdWrap.classList.toggle('playing', on);
+      herdPlay.setAttribute('aria-pressed', on ? 'true' : 'false');
+      herdPlay.setAttribute('aria-label', on ? 'Pause the sound sample' : 'Play a 15-second sound sample');
+    };
+    herdPlay.addEventListener('click', function(){ if(herdAudio.paused){ herdAudio.play(); } else { herdAudio.pause(); } });
+    herdAudio.addEventListener('play',  function(){ herdState(true);  });
+    herdAudio.addEventListener('pause', function(){ herdState(false); });
+    herdAudio.addEventListener('ended', function(){ herdState(false); });
+  }
 })();
 </script>
 </body>
